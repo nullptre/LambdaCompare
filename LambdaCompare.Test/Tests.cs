@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Neleus.LambdaCompare.Tests
+namespace Neleus.LambdaCompare.Test
 {
     [TestClass]
     public class Tests
