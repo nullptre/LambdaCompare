@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.2</TargetFramework>
+    <AssemblyName>Neleus.LambdaCompare</AssemblyName>
+    <RootNamespace>Neleus.LambdaCompare</RootNamespace>
+    <Description>This project compares two lambda expressions recursively traversing their trees</Description>
+    <Authors>Neleus</Authors>
+    <Company>Neleus</Company>
+  </PropertyGroup>
+
+</Project>
