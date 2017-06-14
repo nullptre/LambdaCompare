@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LambdaCompare\LambdaCompare.csproj" />
+    <ProjectReference Include="..\Neleus.LambdaCompare\Neleus.LambdaCompare.csproj" />
   </ItemGroup>
 
   <ItemGroup>
