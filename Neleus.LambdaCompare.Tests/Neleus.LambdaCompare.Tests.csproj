@@ -2,8 +2,8 @@
 
   <PropertyGroup>    
     <TargetFramework>netcoreapp1.1</TargetFramework>    
-    <AssemblyName>Neleus.LambdaCompare.Test</AssemblyName>    
-    <RootNamespace>Neleus.LambdaCompare.Test</RootNamespace>
+    <AssemblyName>Neleus.LambdaCompare.Tests</AssemblyName>    
+    <RootNamespace>Neleus.LambdaCompare.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LambdaCompare\LambdaCompare.csproj" />
+    <ProjectReference Include="..\Neleus.LambdaCompare\Neleus.LambdaCompare.csproj" />
   </ItemGroup>
 
   <ItemGroup>
