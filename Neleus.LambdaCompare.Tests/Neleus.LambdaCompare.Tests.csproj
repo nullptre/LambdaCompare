@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>    
     <AssemblyName>Neleus.LambdaCompare.Tests</AssemblyName>    
     <RootNamespace>Neleus.LambdaCompare.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
