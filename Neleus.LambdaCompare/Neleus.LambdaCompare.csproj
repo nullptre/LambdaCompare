@@ -7,6 +7,8 @@
     <Description>This project compares two lambda expressions recursively traversing their trees</Description>
     <Authors>Neleus</Authors>
     <Company>Neleus</Company>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <Copyright>Neleus</Copyright>
   </PropertyGroup>
 
 </Project>
