@@ -22,7 +22,7 @@ namespace Neleus.LambdaCompare.Tests
             var f2 = (Expression<Func<int, string, string>>)((i, s) =>
                 string.Format(const3, (i + 25).ToString(CultureInfo.InvariantCulture), i + s, const2.ToUpper(), 25));
 
-            Assert.True(Lambda.Eq(f1, f2));
+            Lambda.Eq(f1, f2).Should().BeTrue();
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Neleus.LambdaCompare.Tests
             var f1 = (Expression<Func<Uri, bool>>)(arg1 => Uri.IsWellFormedUriString(arg1.ToString(), UriKind.Absolute));
             var f2 = (Expression<Func<Uri, bool>>)(u => Uri.IsWellFormedUriString(u.ToString(), UriKind.Absolute));
 
-            Assert.True(Lambda.Eq(f1, f2));
+            Lambda.Eq(f1, f2).Should().BeTrue();
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Neleus.LambdaCompare.Tests
                 Port = isSecure ? 443 : 80
             });
 
-            Assert.True(Lambda.Eq(f1, f2));
+            Lambda.Eq(f1, f2).Should().BeTrue();
         }
 
         [Fact]
