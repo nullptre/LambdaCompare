@@ -93,6 +93,10 @@ namespace Neleus.LambdaCompare
                        && ExpressionsEqual(cx.IfFalse, cy.IfFalse, rootX, rootY)
                        && ExpressionsEqual(cx.IfTrue, cy.IfTrue, rootX, rootY);
             }
+            else if (x is DefaultExpression)
+            {
+                return true;
+            }
 
             throw new NotImplementedException(x.ToString());
         }
