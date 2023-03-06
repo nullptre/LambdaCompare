@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq.Expressions;
 using Xunit;
@@ -60,7 +60,7 @@ namespace Neleus.LambdaCompare.Tests
             var f2 = (Expression<Func<Uri, object>>)(u => new { u.Host, Port = 443, Addr = u.AbsolutePath });
 
             // Act
-            var sut = () => Lambda.Eq(f1, f2);
+            var sut = (Func<bool>)(() => Lambda.Eq(f1, f2));
 
             // Assert
             sut.Should().Throw<NotImplementedException>();
