@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +16,14 @@ namespace Neleus.LambdaCompare
             if (x == null || y == null) return false;
 
             var valueX = TryCalculateConstant(x);
-            var valueY = TryCalculateConstant(y);
-
-            if (valueX.IsDefined && valueY.IsDefined)
-                return ValuesEqual(valueX.Value, valueY.Value);
+            if (valueX.IsDefined)
+            {
+                var valueY = TryCalculateConstant(y);
+                if (valueY.IsDefined)
+                {
+                    return ValuesEqual(valueX.Value, valueY.Value);
+                }
+            }
 
             if (x.NodeType != y.NodeType
                 || x.Type != y.Type)
@@ -29,71 +33,61 @@ namespace Neleus.LambdaCompare
                 return false;
             }
 
-            if (x is LambdaExpression)
+            if (x is LambdaExpression lx)
             {
-                var lx = (LambdaExpression)x;
                 var ly = (LambdaExpression)y;
                 var paramsX = lx.Parameters;
                 var paramsY = ly.Parameters;
                 return CollectionsEqual(paramsX, paramsY, lx, ly) && ExpressionsEqual(lx.Body, ly.Body, lx, ly);
             }
-            if (x is MemberExpression)
+            else if (x is MemberExpression mex)
             {
-                var mex = (MemberExpression)x;
                 var mey = (MemberExpression)y;
                 return Equals(mex.Member, mey.Member) && ExpressionsEqual(mex.Expression, mey.Expression, rootX, rootY);
             }
-            if (x is BinaryExpression)
+            else if (x is BinaryExpression bx)
             {
-                var bx = (BinaryExpression)x;
                 var by = (BinaryExpression)y;
                 return bx.Method == by.Method && ExpressionsEqual(bx.Left, by.Left, rootX, rootY) && ExpressionsEqual(bx.Right, by.Right, rootX, rootY);
             }
-            if (x is UnaryExpression)
+            else if (x is UnaryExpression ux)
             {
-                var ux = (UnaryExpression)x;
                 var uy = (UnaryExpression)y;
                 return ux.Method == uy.Method && ExpressionsEqual(ux.Operand, uy.Operand, rootX, rootY);
             }
-            if (x is ParameterExpression)
+            else if (x is ParameterExpression px)
             {
-                var px = (ParameterExpression)x;
                 var py = (ParameterExpression)y;
                 return rootX.Parameters.IndexOf(px) == rootY.Parameters.IndexOf(py);
             }
-            if (x is MethodCallExpression)
+            else if (x is MethodCallExpression mcx)
             {
-                var cx = (MethodCallExpression)x;
-                var cy = (MethodCallExpression)y;
-                return cx.Method == cy.Method
-                       && ExpressionsEqual(cx.Object, cy.Object, rootX, rootY)
-                       && CollectionsEqual(cx.Arguments, cy.Arguments, rootX, rootY);
+                var mcy = (MethodCallExpression)y;
+                return mcx.Method == mcy.Method
+                       && ExpressionsEqual(mcx.Object, mcy.Object, rootX, rootY)
+                       && CollectionsEqual(mcx.Arguments, mcy.Arguments, rootX, rootY);
             }
-            if (x is MemberInitExpression)
+            else if (x is MemberInitExpression mix)
             {
-                var mix = (MemberInitExpression)x;
                 var miy = (MemberInitExpression)y;
                 return ExpressionsEqual(mix.NewExpression, miy.NewExpression, rootX, rootY)
                        && MemberInitsEqual(mix.Bindings, miy.Bindings, rootX, rootY);
             }
-            if (x is NewArrayExpression)
+            else if (x is NewArrayExpression nax)
             {
-                var nx = (NewArrayExpression)x;
-                var ny = (NewArrayExpression)y;
-                return CollectionsEqual(nx.Expressions, ny.Expressions, rootX, rootY);
+                var nay = (NewArrayExpression)y;
+                return CollectionsEqual(nax.Expressions, nay.Expressions, rootX, rootY);
             }
-            if (x is NewExpression)
+            else if (x is NewExpression nx)
             {
-                var nx = (NewExpression)x;
                 var ny = (NewExpression)y;
                 return Equals(nx.Constructor, ny.Constructor)
                        && CollectionsEqual(nx.Arguments, ny.Arguments, rootX, rootY)
-                       && (nx.Members == null && ny.Members == null
-                           || nx.Members != null && ny.Members != null && CollectionsEqual(nx.Members, ny.Members));
+                       && ((nx.Members == null && ny.Members == null)
+                           || (nx.Members != null && ny.Members != null && CollectionsEqual(nx.Members, ny.Members)));
             }
-            if (x is ConditionalExpression)
+            else if (x is ConditionalExpression cx)
             {
-                var cx = (ConditionalExpression)x;
                 var cy = (ConditionalExpression)y;
                 return ExpressionsEqual(cx.Test, cy.Test, rootX, rootY)
                        && ExpressionsEqual(cx.IfFalse, cy.IfFalse, rootX, rootY)
@@ -105,11 +99,8 @@ namespace Neleus.LambdaCompare
 
         private static bool IsAnonymousType(Type type)
         {
-            var hasCompilerGeneratedAttribute = type.GetTypeInfo().GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
-            var nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
-            var isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
-
-            return isAnonymousType;
+            return type.FullName.Contains("AnonymousType") &&
+                type.GetTypeInfo().GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
         }
 
         private static bool MemberInitsEqual(ICollection<MemberBinding> bx, ICollection<MemberBinding> by, LambdaExpression rootX, LambdaExpression rootY)
@@ -134,47 +125,48 @@ namespace Neleus.LambdaCompare
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (x is ICollection && y is ICollection)
-                return CollectionsEqual((ICollection)x, (ICollection)y);
+            if (x is ICollection collectionX && y is ICollection collectionY)
+                return CollectionsEqual(collectionX, collectionY);
 
             return Equals(x, y);
         }
 
         private static ConstantValue TryCalculateConstant(Expression e)
         {
-            if (e is ConstantExpression)
-                return new ConstantValue(true, ((ConstantExpression)e).Value);
-            if (e is MemberExpression)
+            if (e is ConstantExpression constantExpression)
             {
-                var me = (MemberExpression)e;
-                var parentValue = TryCalculateConstant(me.Expression);
+                return new ConstantValue(true, constantExpression.Value);
+            }
+            else if (e is MemberExpression memberExpression)
+            {
+                var parentValue = TryCalculateConstant(memberExpression.Expression);
                 if (parentValue.IsDefined)
                 {
                     var result =
-                        me.Member is FieldInfo
-                            ? ((FieldInfo)me.Member).GetValue(parentValue.Value)
-                            : ((PropertyInfo)me.Member).GetValue(parentValue.Value);
+                        memberExpression.Member is FieldInfo info
+                            ? info.GetValue(parentValue.Value)
+                            : ((PropertyInfo)memberExpression.Member).GetValue(parentValue.Value);
                     return new ConstantValue(true, result);
                 }
             }
-            if (e is NewArrayExpression)
+            else if (e is NewArrayExpression newArrayExpression)
             {
-                var ae = ((NewArrayExpression)e);
-                var result = ae.Expressions.Select(TryCalculateConstant);
+                var result = newArrayExpression.Expressions.Select(TryCalculateConstant);
                 if (result.All(i => i.IsDefined))
-                    return new ConstantValue(true, result.Select(i => i.Value).ToArray<object>());
+                    return new ConstantValue(true, result.Select(i => i.Value).ToArray());
             }
-            if (e is ConditionalExpression)
+            else if (e is ConditionalExpression conditionalExpression)
             {
-                var ce = (ConditionalExpression)e;
-                var evaluatedTest = TryCalculateConstant(ce.Test);
+                var evaluatedTest = TryCalculateConstant(conditionalExpression.Test);
                 if (evaluatedTest.IsDefined)
                 {
-                    return TryCalculateConstant(Equals(evaluatedTest.Value, true) ? ce.IfTrue : ce.IfFalse);
+                    return TryCalculateConstant(Equals(evaluatedTest.Value, true)
+                        ? conditionalExpression.IfTrue
+                        : conditionalExpression.IfFalse);
                 }
             }
 
-            return default(ConstantValue);
+            return default;
         }
 
         private static bool CollectionsEqual(IEnumerable<Expression> x, IEnumerable<Expression> y, LambdaExpression rootX, LambdaExpression rootY)
@@ -195,7 +187,7 @@ namespace Neleus.LambdaCompare
                        .All(o => Equals(o.X, o.Y));
         }
 
-        private struct ConstantValue
+        private readonly struct ConstantValue
         {
             public ConstantValue(bool isDefined, object value)
                 : this()
