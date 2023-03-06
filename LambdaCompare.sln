@@ -1,14 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neleus.LambdaCompare", "Neleus.LambdaCompare\Neleus.LambdaCompare.csproj", "{28179CB7-80D1-4F8C-B171-97DABAB7C874}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neleus.LambdaCompare", "Neleus.LambdaCompare\Neleus.LambdaCompare.csproj", "{28179CB7-80D1-4F8C-B171-97DABAB7C874}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neleus.LambdaCompare.Tests", "Neleus.LambdaCompare.Tests\Neleus.LambdaCompare.Tests.csproj", "{D5556DE2-1758-4EF1-9835-3807E9DED85F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neleus.LambdaCompare.Tests", "Neleus.LambdaCompare.Tests\Neleus.LambdaCompare.Tests.csproj", "{D5556DE2-1758-4EF1-9835-3807E9DED85F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{79CD7955-3850-4C9A-8D11-1322ED8FAF4C}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
