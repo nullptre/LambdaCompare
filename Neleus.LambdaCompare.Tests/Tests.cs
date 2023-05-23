@@ -59,5 +59,112 @@ namespace Neleus.LambdaCompare.Tests
             var f2 = (Expression<Func<Uri, object>>) (u => new { u.Host, Port = 443, Addr = u.AbsolutePath });
             Assert.Inconclusive("Anonymous Types are not supported");
         }
+
+        private class ClassForTesting
+        {
+            public object Property1 { get; set; }
+            public object Property2 { get; set; }
+            public Dictionary<int, int> DictProperty { get; set; }
+        }
+
+        private class AdditionalClassForTesting
+        {
+            public DateTime? Date { get; set; }
+        }
+
+        [TestMethod]
+        public void X()
+        {
+            // Object initialization
+            Expression<Func<IGrouping<int, object>, ClassForTesting>> ox = x => new ClassForTesting
+            {
+                Property1 = x.Sum(d => 1),
+                Property2 = x.Sum(d => 0)
+            };
+            Expression<Func<IGrouping<int, object>, ClassForTesting>> oy = x => new ClassForTesting
+            {
+                Property1 = x.Sum(d => 1),
+                Property2 = x.Sum(d => 0)
+            };
+            Assert.IsTrue(Lambda.Eq(ox, oy));
+
+            oy = x => new ClassForTesting
+            {
+                Property2 = x.Sum(d => 0),
+                Property1 = x.Sum(d => 1)
+            };
+            Assert.IsTrue(Lambda.Eq(ox, oy));
+
+            ox = x => new ClassForTesting();
+            oy = x => new ClassForTesting();
+            Assert.IsTrue(Lambda.Eq(ox, oy));
+
+
+            // List initialization
+            Expression<Func<object, List<int>>> lx = g => new List<int> { 3, 7, 30 };
+            Expression<Func<object, List<int>>> ly = g => new List<int> { 3, 7, 30 };
+            Assert.IsTrue(Lambda.Eq(lx, ly));
+
+            ly = g => new List<int> { 7, 3, 30 };
+            Assert.IsTrue(Lambda.Eq(lx, ly));
+
+            lx = g => new List<int>();
+            ly = g => new List<int>();
+            Assert.IsTrue(Lambda.Eq(lx, ly));
+
+
+            // Dictionary initialization
+            Expression<Func<object, Dictionary<int, int>>> dx = x => new Dictionary<int, int> { { 3, 33 }, { 7, 77 }, { 30, 333 } };
+            Expression<Func<object, Dictionary<int, int>>> dy = x => new Dictionary<int, int> { { 3, 33 }, { 7, 77 }, { 30, 333 } };
+            Assert.IsTrue(Lambda.Eq(dx, dy));
+
+            dy = g => new Dictionary<int, int> { { 7, 77 }, { 3, 33 }, { 30, 333 } };
+            Assert.IsTrue(Lambda.Eq(dx, dy));
+
+            dx = g => new Dictionary<int, int>();
+            dy = g => new Dictionary<int, int>();
+            Assert.IsTrue(Lambda.Eq(dx, dy));
+
+
+            // Dictionary initialization inside grouping
+            var utcNow = DateTime.UtcNow;
+            var limitDate3 = utcNow.AddDays(-3);
+            var limitDate7 = utcNow.AddDays(-7);
+            var limitDate30 = utcNow.AddDays(-30);
+            Expression<Func<IGrouping<int, AdditionalClassForTesting>, ClassForTesting>> gx = g => new ClassForTesting
+            {
+                DictProperty = new Dictionary<int, int>
+                {
+                    { 3, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate3 ? 1 : 0) },
+                    { 7, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate7 ? 1 : 0) },
+                    { 30, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate30 ? 1 : 0) }
+                }
+            };
+            Expression<Func<IGrouping<int, AdditionalClassForTesting>, ClassForTesting>> gy = g => new ClassForTesting
+            {
+                DictProperty = new Dictionary<int, int>
+                {
+                    { 3, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate3 ? 1 : 0) },
+                    { 7, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate7 ? 1 : 0) },
+                    { 30, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate30 ? 1 : 0) }
+                }
+            };
+            Assert.IsTrue(Lambda.Eq(gx, gy));
+
+            gy = g => new ClassForTesting
+            {
+                DictProperty = new Dictionary<int, int>
+                {
+                    { 7, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate7 ? 1 : 0) },
+                    { 3, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate3 ? 1 : 0) },
+                    { 30, g.Sum(d => d.Date.HasValue && d.Date.Value < limitDate30 ? 1 : 0) }
+                }
+            };
+            Assert.IsTrue(Lambda.Eq(gx, gy));
+
+            gx = g => new ClassForTesting { DictProperty = new Dictionary<int, int>() };
+            gy = g => new ClassForTesting { DictProperty = new Dictionary<int, int>() };
+            Assert.IsTrue(Lambda.Eq(gx, gy));
+        }
     }
 }

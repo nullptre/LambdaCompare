@@ -99,6 +99,13 @@ namespace Neleus.LambdaCompare
                        && ExpressionsEqual(cx.IfFalse, cy.IfFalse, rootX, rootY)
                        && ExpressionsEqual(cx.IfTrue, cy.IfTrue, rootX, rootY);
             }
+            if (x is ListInitExpression)
+            {
+                var lix = (ListInitExpression)x;
+                var liy = (ListInitExpression)y;
+                return ExpressionsEqual(lix.NewExpression, liy.NewExpression, rootX, rootY)
+                       && ListInitsEqual(lix.Initializers, liy.Initializers, rootX, rootY);
+            }
 
             throw new NotImplementedException(x.ToString());
         }
@@ -128,6 +135,26 @@ namespace Neleus.LambdaCompare
                         by.Cast<MemberAssignment>().OrderBy(b => b.Member.Name).Select((b, i) => new { Expr = b.Expression, b.Member, Index = i }),
                         o => o.Index, o => o.Index, (xe, ye) => new { XExpr = xe.Expr, XMember = xe.Member, YExpr = ye.Expr, YMember = ye.Member })
                     .All(o => Equals(o.XMember, o.YMember) && ExpressionsEqual(o.XExpr, o.YExpr, rootX, rootY));
+        }
+
+        /// <summary>
+        /// Based on https://stackoverflow.com/questions/26680849/comparing-multivariable-boolean-functions
+        /// </summary>
+        private static bool ListInitsEqual(ICollection<ElementInit> bx, ICollection<ElementInit> by, LambdaExpression rootX, LambdaExpression rootY)
+        {
+            if (bx.Count != by.Count)
+            {
+                return false;
+            }
+
+            return
+                bx.OrderBy(b => b.Arguments.FirstOrDefault()?.ToString()).Select((b, i) => new { b.AddMethod, b.Arguments, Index = i })
+                    .Join(
+                        by.OrderBy(b => b.Arguments.FirstOrDefault()?.ToString()).Select((b, i) => new { b.AddMethod, b.Arguments, Index = i }),
+                        o => o.Index, o => o.Index, (xe, ye) => new { X = xe, XAddMethod = xe.AddMethod, XArgs = xe.Arguments, Y = ye, YAddMethod = ye.AddMethod, YArgs = ye.Arguments })
+                    .All(o =>
+                        Equals(o.X, o.Y) ||
+                        Equals(o.XAddMethod, o.YAddMethod) && o.XArgs.Count == o.YArgs.Count && o.XArgs.Select((_, i) => ExpressionsEqual(o.XArgs[i], o.YArgs[i], rootX, rootY)).All(r => r));
         }
 
         private static bool ValuesEqual(object x, object y)
